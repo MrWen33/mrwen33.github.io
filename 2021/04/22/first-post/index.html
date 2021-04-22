@@ -5,12 +5,16 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Archive: 2021</title>
+    <title>first-post - MrWen33</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="MrWen33,"> 
-    
+    <meta name="description" content="手写PBR shader练习使用Unity Urp练习手写PBR.实现了单平行光光源与环境光照明, 不支持多光源与shadowmap实现参考了LearnOpengl的PBR章节
+要点
+直接光
+
+漫反,"> 
     <meta name="author" content="MrWen33"> 
     <link rel="alternative" href="atom.xml" title="MrWen33" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -23,33 +27,98 @@
 <body class="loading">
     <span id="config-title" style="display:none">MrWen33</span>
     <div id="loader"></div>
-    <div id="single" class="page">
-    <div id="top">
-        <a class="iconfont icon-left image-icon" href="javascript:history.back()"></a>
-    </div>
-    <div class="section">
-        <div class="article">
-            <div class="main">
-                <div class="content">
-                    <div class="timeline">
-                      <h2 class="timeline-title">归档: 1篇</h2><hr>
-                      
-                      
-                        
-                          <h3 class="timeline-subtitle">2021</h3>
-                        
-                        <div class="timeline-item">
-                          <time>2021-04-22</time>
-                          <a target="_self" href="/2021/04/22/first-post/">first-post</a>
-                        </div>
-                      
-                    </div>
-                </div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://mrwen33.github.io"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">first-post</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
             </div>
+            <div id="qr"></div>
         </div>
     </div>
+    <div class="scrollbar"></div>
 </div>
 
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">first-post</h1>
+        <div class="stuff">
+            <span>四月 22, 2021</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/PBR/" rel="tag">PBR</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Unity/" rel="tag">Unity</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h1 id="手写PBR-shader练习"><a href="#手写PBR-shader练习" class="headerlink" title="手写PBR shader练习"></a>手写PBR shader练习</h1><p>使用Unity Urp练习手写PBR.<br>实现了单平行光光源与环境光照明, 不支持多光源与shadowmap<br>实现参考了LearnOpengl的PBR章节</p>
+<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ul>
+<li><p>直接光</p>
+<ul>
+<li>漫反射: 使用Lambert模型</li>
+<li>镜面反射: 使用Cook-Torrance模型</li>
+</ul>
+</li>
+<li><p>间接光(环境光)</p>
+<ul>
+<li>漫反射: 使用Unity提供的SH光照, Lambert模型</li>
+<li>镜面反射<ul>
+<li>Split Sum法: 使用mipmap后的环境贴图与BRDF积分贴图</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>注意Schlick-GGX(几何遮蔽函数)中参数k的值在直接光照与IBL光照下不同</p>
+</li>
+<li><p>metallic(金属度)是用于调整漫反射强度与计算金属F0值的参数, 但原始BRDF方程并不包含metallic这个参数</p>
+</li>
+</ul>
+<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="https://github.com/MrWen33/PBRExercise/blob/main/photos/balls.png?raw=true" alt="balls"></p>
+<h2 id="项目链接"><a href="#项目链接" class="headerlink" title="项目链接"></a>项目链接</h2><p><a target="_blank" rel="noopener" href="https://github.com/MrWen33/PBRExercise">PBRExercise</a></p>
+<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://learnopengl-cn.github.io/07%20PBR/01%20Theory/">LearnOpengl</a> LearnOpengl PBR章节</li>
+<li><a target="_blank" rel="noopener" href="https://blog.selfshadow.com/publications/s2012-shading-course/">Siggraph Course 2012</a> siggraph 2012 course的ppt与课程笔记</li>
+</ul>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/1401042579.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='false'
+        data-ae='false'
+        data-ci=''
+        data-cs=''
+        data-r=''
+        data-o=''
+        data-a=''
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
 </body>
 
 
