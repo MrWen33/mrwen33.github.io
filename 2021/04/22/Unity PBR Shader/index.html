@@ -5,17 +5,16 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>dx12笔记一-基本概念 - MrWen33</title>
+    <title>Unity PBR Shader练习 - MrWen33</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="MrWen33,"> 
-    <meta name="description" content="DirectX12 学习笔记-基本概念基本概念
-资源与Resource Heap
-描述符堆(Descriptor Heap)
-PSO
-Root Signature, Shader
-CommandQu,"> 
+    <meta name="description" content="使用Unity Urp练习手写PBR.实现了单平行光光源与环境光照明, 不支持多光源与shadowmap实现参考了LearnOpengl的PBR章节
+要点
+直接光
+
+漫反射: 使用Lambert模型,"> 
     <meta name="author" content="MrWen33"> 
     <link rel="alternative" href="atom.xml" title="MrWen33" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -33,7 +32,7 @@ CommandQu,">
     <div class="bar" style="width: 0;"></div>
     <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://mrwen33.github.io"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
-    <h3 class="subtitle">dx12笔记一-基本概念</h3>
+    <h3 class="subtitle">Unity PBR Shader练习</h3>
     <div class="social">
         <div>
             <div class="share">
@@ -48,39 +47,43 @@ CommandQu,">
     <div class="section">
         <div class="article">
     <div class='main'>
-        <h1 class="title">dx12笔记一-基本概念</h1>
+        <h1 class="title">Unity PBR Shader练习</h1>
         <div class="stuff">
-            <span>九月 05, 2021</span>
+            <span>四月 22, 2021</span>
             
-  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/dx12/" rel="tag">dx12</a></li></ul>
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/PBR/" rel="tag">PBR</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Unity/" rel="tag">Unity</a></li></ul>
 
 
         </div>
         <div class="content markdown">
-            <h1 id="DirectX12-学习笔记-基本概念"><a href="#DirectX12-学习笔记-基本概念" class="headerlink" title="DirectX12 学习笔记-基本概念"></a>DirectX12 学习笔记-基本概念</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><ul>
-<li>资源与Resource Heap</li>
-<li>描述符堆(Descriptor Heap)</li>
-<li>PSO</li>
-<li>Root Signature, Shader</li>
-<li>CommandQueue, CommandList</li>
-<li>SwapChain</li>
-<li>Resource Barrier</li>
+            <p>使用Unity Urp练习手写PBR.<br>实现了单平行光光源与环境光照明, 不支持多光源与shadowmap<br>实现参考了LearnOpengl的PBR章节</p>
+<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ul>
+<li><p>直接光</p>
+<ul>
+<li>漫反射: 使用Lambert模型</li>
+<li>镜面反射: 使用Cook-Torrance模型</li>
 </ul>
-<h2 id="资源与ResourceHeap"><a href="#资源与ResourceHeap" class="headerlink" title="资源与ResourceHeap"></a>资源与ResourceHeap</h2><p>GPU中的资源有Vertex Buffer, Index Buffer, Constant Buffer, 纹理, Render Target等等</p>
-<p>GPU中的资源在dx12上以<code>ID3D12Resource</code>的形式表示, 而<code>ID3D12Resource</code>表示Resource Heap上的一段数据</p>
-<p>Resource Heap有四种: </p>
-<ol>
-<li>Default Heap (D3D12_HEAP_TYPE_DEFAULT)</li>
-<li>Upload Heap (D3D12_HEAP_TYPE_UPLOAD)</li>
-<li>Readback Heap(D3D12_HEAP_TYPE_READBACK)</li>
-<li>Custom Heap (D3D12_HEAP_TYPE_CUSTOM)</li>
-</ol>
-<h3 id="Default-Heap"><a href="#Default-Heap" class="headerlink" title="Default Heap"></a>Default Heap</h3><p>Default Heap 是一块仅存在于GPU内存上的数据, 所以GPU对其有读写权限, 并且访问非常快速, 而CPU对其没有权限.</p>
-<h3 id="Upload-Heap"><a href="#Upload-Heap" class="headerlink" title="Upload Heap"></a>Upload Heap</h3><p>Upload Heap 在CPU与GPU内存上都存在, CPU有写权限而GPU有读权限.<br>Upload Heap一般用于向Default Heap中上传资源</p>
-<h3 id="Readback-Heap"><a href="#Readback-Heap" class="headerlink" title="Readback Heap"></a>Readback Heap</h3><p>Readback Heap 在CPU与GPU内存上都存在, GPU有写权限而CPU有读权限.<br>用于将渲染的图片或数据从GPU回读到CPU中</p>
-<h2 id="描述符堆-Descriptor-Heap"><a href="#描述符堆-Descriptor-Heap" class="headerlink" title="描述符堆(Descriptor Heap)"></a>描述符堆(Descriptor Heap)</h2><h2 id="Pipeline-State-Object"><a href="#Pipeline-State-Object" class="headerlink" title="Pipeline State Object"></a>Pipeline State Object</h2><h2 id="Root-Signature-Shader"><a href="#Root-Signature-Shader" class="headerlink" title="Root Signature, Shader"></a>Root Signature, Shader</h2><h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
-<li><a target="_blank" rel="noopener" href="https://www.braynzarsoft.net/viewtutorial/q16390-directx-12-index-buffers">Braynzarsoft: Index Buffer</a></li>
-</ol>
+</li>
+<li><p>间接光(环境光)</p>
+<ul>
+<li>漫反射: 使用Unity提供的SH光照, Lambert模型</li>
+<li>镜面反射<ul>
+<li>Split Sum法: 使用mipmap后的环境贴图与BRDF积分贴图</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>注意Schlick-GGX(几何遮蔽函数)中参数k的值在直接光照与IBL光照下不同</p>
+</li>
+<li><p>metallic(金属度)是用于调整漫反射强度与计算金属F0值的参数, 但原始BRDF方程并不包含metallic这个参数</p>
+</li>
+</ul>
+<h2 id="效果图"><a href="#效果图" class="headerlink" title="效果图"></a>效果图</h2><p><img src="https://github.com/MrWen33/PBRExercise/blob/main/photos/balls.png?raw=true" alt="balls"></p>
+<h2 id="项目链接"><a href="#项目链接" class="headerlink" title="项目链接"></a>项目链接</h2><p><a target="_blank" rel="noopener" href="https://github.com/MrWen33/PBRExercise">PBRExercise</a></p>
+<h2 id="相关链接"><a href="#相关链接" class="headerlink" title="相关链接"></a>相关链接</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://learnopengl-cn.github.io/07%20PBR/01%20Theory/">LearnOpengl</a> LearnOpengl PBR章节</li>
+<li><a target="_blank" rel="noopener" href="https://blog.selfshadow.com/publications/s2012-shading-course/">Siggraph Course 2012</a> siggraph 2012 course的ppt与课程笔记</li>
+</ul>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">

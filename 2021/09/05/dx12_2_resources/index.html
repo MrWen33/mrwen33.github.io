@@ -5,13 +5,13 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>dx12笔记二-资源的创建，上传与使用 - MrWen33</title>
+    <title>dx12笔记(二)-资源的创建，上传与使用 - MrWen33</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="MrWen33,"> 
-    <meta name="description" content="dx12笔记二-资源的创建，上传与使用前置概念DX12中的资源包括Vertex Buffer, Index Buffer, Constant Buffer, Texture, Shader
-GPU端,"> 
+    <meta name="description" content="前置概念DX12中的资源包括Vertex Buffer, Index Buffer, Constant Buffer, Texture等等
+GPU端的DX12资源的C++表示为ID3DResourc,"> 
     <meta name="author" content="MrWen33"> 
     <link rel="alternative" href="atom.xml" title="MrWen33" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -29,7 +29,7 @@ GPU端,">
     <div class="bar" style="width: 0;"></div>
     <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://mrwen33.github.io"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
-    <h3 class="subtitle">dx12笔记二-资源的创建，上传与使用</h3>
+    <h3 class="subtitle">dx12笔记(二)-资源的创建，上传与使用</h3>
     <div class="social">
         <div>
             <div class="share">
@@ -44,7 +44,7 @@ GPU端,">
     <div class="section">
         <div class="article">
     <div class='main'>
-        <h1 class="title">dx12笔记二-资源的创建，上传与使用</h1>
+        <h1 class="title">dx12笔记(二)-资源的创建，上传与使用</h1>
         <div class="stuff">
             <span>九月 05, 2021</span>
             
@@ -53,7 +53,7 @@ GPU端,">
 
         </div>
         <div class="content markdown">
-            <h1 id="dx12笔记二-资源的创建，上传与使用"><a href="#dx12笔记二-资源的创建，上传与使用" class="headerlink" title="dx12笔记二-资源的创建，上传与使用"></a>dx12笔记二-资源的创建，上传与使用</h1><h1 id="前置概念"><a href="#前置概念" class="headerlink" title="前置概念"></a>前置概念</h1><p>DX12中的资源包括Vertex Buffer, Index Buffer, Constant Buffer, Texture, Shader</p>
+            <h2 id="前置概念"><a href="#前置概念" class="headerlink" title="前置概念"></a>前置概念</h2><p>DX12中的资源包括Vertex Buffer, Index Buffer, Constant Buffer, Texture等等</p>
 <p>GPU端的DX12资源的C++表示为<code>ID3DResource</code>, 表示资源堆中的一段内存.</p>
 <p>CPU端的DX12资源C++表示为<code>ID3DBlob</code></p>
 <p>Resource State与Resource Barrier: Resource State意思为资源状态，一些对资源的操作在某些状态下可以进行而在某些状态下不行。Resource Barrier用于资源状态的转换，这样可以避免资源的操作与当前状态不符. Resource Barrier进行的转换操作在Command List执行.</p>
@@ -74,7 +74,35 @@ GPU端,">
 
 
 
-<h2 id="Constant-Buffer"><a href="#Constant-Buffer" class="headerlink" title="Constant Buffer"></a>Constant Buffer</h2><h3 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h3><h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><h2 id="Texture"><a href="#Texture" class="headerlink" title="Texture"></a>Texture</h2><h3 id="创建-2"><a href="#创建-2" class="headerlink" title="创建"></a>创建</h3><h3 id="使用-2"><a href="#使用-2" class="headerlink" title="使用"></a>使用</h3><h2 id="Shader"><a href="#Shader" class="headerlink" title="Shader"></a>Shader</h2><h3 id="创建-3"><a href="#创建-3" class="headerlink" title="创建"></a>创建</h3><h3 id="使用-3"><a href="#使用-3" class="headerlink" title="使用"></a>使用</h3>
+<h2 id="Constant-Buffer"><a href="#Constant-Buffer" class="headerlink" title="Constant Buffer"></a>Constant Buffer</h2><h3 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h3><p>Constant Buffer是更改很频繁的数据, 所以直接使用Upload Heap向GPU提供数据.</p>
+<p>把相同类型的constant buffer存在同一个Heap中, 需要注意GPU只能读取地址为256倍数的constant buffer数据, 所以要对constant buffer的大小进行手动对齐</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> elementByteSize = (<span class="built_in"><span class="keyword">sizeof</span></span>(ConstantBuffer) + <span class="number">0xFF</span>) &amp; ~<span class="number">0xFF</span> <span class="comment">// 256字节对齐</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建Upload Heap</span></span><br><span class="line"><span class="built_in">ThrowIfFailed</span>(device-&gt;<span class="built_in">CreateCommittedResource</span>(</span><br><span class="line">    &amp;<span class="built_in">CD3DX12_HEAP_PROPERTIES</span>(D3D12_HEAP_TYPE_UPLOAD),</span><br><span class="line">    D3D12_HEAP_FLAG_NONE,</span><br><span class="line">    &amp;CD3DX12_RESOURCE_DESC::<span class="built_in">Buffer</span>(elementByteSize*elementCount),</span><br><span class="line">    D3D12_RESOURCE_STATE_GENERIC_READ,</span><br><span class="line">    <span class="literal">nullptr</span>,</span><br><span class="line">    <span class="built_in">IID_PPV_ARGS</span>(&amp;uploadBuffer)));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Upload Heap映射到CPU端数据</span></span><br><span class="line"><span class="built_in">ThrowIfFailed</span>(uploadBuffer-&gt;<span class="built_in">Map</span>(<span class="number">0</span>, <span class="literal">nullptr</span>, <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>**&gt;(&amp;mappedData)));</span><br></pre></td></tr></table></figure>
+
+<p>Upload Buffer映射到CPU端数据后, 直到释放都不会Unmap, 所以需要用户自己保证GPU读取数据的同时CPU不在写入(使用同步技术).</p>
+<p>若要修改constant buffer数据, 直接修改Upload Buffer映射到的CPU端数据即可</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">memcpy</span>(&amp;mappedData[elementIndex*elementByteSize], &amp;newData, <span class="built_in"><span class="keyword">sizeof</span></span>(ConstantBuffer)); <span class="comment">// mappedData类型为BYTE*</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>C++端:<br>在Root Signature中设置后, 渲染循环中绑定对应的Root Signature, 使用偏移量设置对应的数据</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义ConstantBuffer结构</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ConstantBuffer</span>&#123;</span></span><br><span class="line">    XMFLOAT4X4 world;</span><br><span class="line">    XMFLOAT4x4 view;</span><br><span class="line">    XMFLOAT4x4 proj;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置Root Signature</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// slotRootParameter[0].InitAs...</span></span><br><span class="line">slotRootParameter[<span class="number">1</span>].<span class="built_in">InitAsConstantBufferView</span>(<span class="number">0</span>); <span class="comment">// 可以直接设置CBV参数, 也可以放在Descriptor Heap中. 参数为ShaderRegister编号</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(..., slotRootParameter, ...)</span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// D3D12SerializeRootSignature(&amp;rootSigDesc, ...)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 渲染循环中</span></span><br><span class="line"><span class="keyword">int</span> elementByteSize = (<span class="built_in"><span class="keyword">sizeof</span></span>(ConstantBuffer) + <span class="number">0xFF</span>) &amp; ~<span class="number">0xFF</span> <span class="comment">// 256字节对齐</span></span><br><span class="line">D3D12_GPU_VIRTUAL_ADDRESS cbAddress = cbUploadBuffer-&gt;<span class="built_in">GetGPUVirtualAddress</span>() + elementIndex * elementByteSize;</span><br><span class="line">cmdList-&gt;<span class="built_in">SetGraphicsRootConstantBufferView</span>(<span class="number">1</span>, cbAddress);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+
+<p>HLSL端:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cbuffer cb: register(b0) &#x2F;&#x2F; 与RootSignature中设置的ShaderRegister对应</span><br><span class="line">&#123;</span><br><span class="line">    float4x4 g_World;</span><br><span class="line">    float4x4 g_View;</span><br><span class="line">    float4x4 g_Proj;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>或使用dx12的新语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct Constants&#123;</span><br><span class="line">    float4x4 World;</span><br><span class="line">    float4x4 View;</span><br><span class="line">    float4x4 Proj;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">ConstantBuffer&lt;Constants&gt; gConstants: register(b0);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Texture"><a href="#Texture" class="headerlink" title="Texture"></a>Texture</h2><h3 id="创建-2"><a href="#创建-2" class="headerlink" title="创建"></a>创建</h3><p>与Vertex Buffer/Index Buffer相似, 经过Upload Heap向Default Heap上传从文件中读取或程序化生成的数据</p>
+<p>不同的点是ResourceBarrier的目标不是<code>D3D12_RESOURCE_STATE_GENERIC_READ</code>而是<code>D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE</code></p>
+<h3 id="使用-2"><a href="#使用-2" class="headerlink" title="使用"></a>使用</h3><p>与CBuffer相似, 在Descriptor Heap上创建ShaderResourceView, 设置RootSignature, 渲染循环中绑定, 在HLSL中使用.</p>
+<p>PS. RootSignature不支持使用<code>SetGraphicsShaderResourceView</code>直接绑定材质贴图, 所以只能使用Descriptor Heap的方式绑定Texture.</p>
+<p>PPS. 支持使用<code>SetGraphicsShaderResourceView</code>绑定的是只读缓冲区, 比如<code>Buffer&lt;float4&gt;</code>或<code>StructuredBuffer&lt;T&gt;</code>.</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li>DX12龙书: <em>Introduction To 3D Game Programming With DirectX12</em></li>
+<li><a target="_blank" rel="noopener" href="https://www.braynzarsoft.net/viewtutorial/q16390-04-directx-12-braynzar-soft-tutorials">Braynzar Soft DX12 tutorals</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/">MSDN</a></li>
+</ol>
+
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
                 <source type="audio/mpeg" src="">
