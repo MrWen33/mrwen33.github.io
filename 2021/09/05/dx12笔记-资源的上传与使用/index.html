@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>dx12笔记二-资源的创建，上传与使用 - MrWen33</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="MrWen33,"> 
+    <meta name="description" content="dx12笔记二-资源的创建，上传与使用前置概念DX12中的资源包括Vertex Buffer, Index Buffer, Constant Buffer, Texture, Shader
+GPU端,"> 
+    <meta name="author" content="MrWen33"> 
+    <link rel="alternative" href="atom.xml" title="MrWen33" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="loading">
+    <span id="config-title" style="display:none">MrWen33</span>
+    <div id="loader"></div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://mrwen33.github.io"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">dx12笔记二-资源的创建，上传与使用</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">dx12笔记二-资源的创建，上传与使用</h1>
+        <div class="stuff">
+            <span>九月 05, 2021</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/dx12/" rel="tag">dx12</a></li></ul>
+
+
+        </div>
+        <div class="content markdown">
+            <h1 id="dx12笔记二-资源的创建，上传与使用"><a href="#dx12笔记二-资源的创建，上传与使用" class="headerlink" title="dx12笔记二-资源的创建，上传与使用"></a>dx12笔记二-资源的创建，上传与使用</h1><h1 id="前置概念"><a href="#前置概念" class="headerlink" title="前置概念"></a>前置概念</h1><p>DX12中的资源包括Vertex Buffer, Index Buffer, Constant Buffer, Texture, Shader</p>
+<p>GPU端的DX12资源的C++表示为<code>ID3DResource</code>, 表示资源堆中的一段内存.</p>
+<p>CPU端的DX12资源C++表示为<code>ID3DBlob</code></p>
+<p>Resource State与Resource Barrier: Resource State意思为资源状态，一些对资源的操作在某些状态下可以进行而在某些状态下不行。Resource Barrier用于资源状态的转换，这样可以避免资源的操作与当前状态不符. Resource Barrier进行的转换操作在Command List执行.</p>
+<h2 id="Vertex-Buffer-Index-Buffer"><a href="#Vertex-Buffer-Index-Buffer" class="headerlink" title="Vertex Buffer, Index Buffer"></a>Vertex Buffer, Index Buffer</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>Vertex/Index Buffer很少改变，所以使用Default Heap存储数据，使用Upload Heap将数据上传到Default Heap中</p>
+<p>数据流动: </p>
+<p>使用<code>CreateCommittedResource</code>创建隐式Default Heap与资源</p>
+<p>关于<code>CreateCommitResource</code>, <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createcommittedresource">MSDN</a>上的说明是：创建资源与隐式堆(implicit heap)，这个隐式堆大小可以容纳整个资源, 而创建的资源资源被映射到隐式堆.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ThrowIfFailed</span>(device-&gt;<span class="built_in">CreateCommittedResource</span>(</span><br><span class="line">    &amp;<span class="built_in">CD3DX12_HEAP_PROPERTIES</span>(D3D12_HEAP_TYPE_DEFAULT), <span class="comment">// 堆的类型：Default</span></span><br><span class="line">    D3D12_HEAP_FLAG_NONE,</span><br><span class="line">    &amp;CD3DX12_RESOURCE_DESC::<span class="built_in">Buffer</span>(byteSize), <span class="comment">// 资源的大小</span></span><br><span class="line">    D3D12_RESOURCE_STATE_COMMON,  <span class="comment">// 初始状态</span></span><br><span class="line">    <span class="literal">nullptr</span>,</span><br><span class="line">    <span class="built_in">IID_PPV_ARGS</span>(defaultBuffer.<span class="built_in">GetAddressOf</span>()))); <span class="comment">// 创建的资源，通过引用参数方式传入. defualtBuffer类型为ComPtr&lt;ID3DResource&gt;</span></span><br></pre></td></tr></table></figure>
+<p>同样使用<code>CreateComittedResource</code>创建Upload Heap</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ThrowIfFailed</span>(device-&gt;<span class="built_in">CreateCommittedResource</span>(</span><br><span class="line">    &amp;<span class="built_in">CD3DX12_HEAP_PROPERTIES</span>(D3D12_HEAP_TYPE_UPLOAD), <span class="comment">// 堆类型：Upload</span></span><br><span class="line">    D3D12_HEAP_FLAG_NONE,</span><br><span class="line">    &amp;CD3DX12_RESOURCE_DESC::<span class="built_in">Buffer</span>(byteSize),</span><br><span class="line">    D3D12_RESOURCE_STATE_GENERIC_READ,</span><br><span class="line">    <span class="literal">nullptr</span>,</span><br><span class="line">    <span class="built_in">IID_PPV_ARGS</span>(uploadBuffer.<span class="built_in">GetAddressOf</span>())));</span><br></pre></td></tr></table></figure>
+
+<p>创建完毕后，使用Resource Barrier转换资源状态并使用<code>UpdateSubresources</code>方法通过Upload Heap将数据上传到Default Heap.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 准备数据</span></span><br><span class="line">D3D12_SUBRESOURCE_DATA subResourceData = &#123;&#125;;</span><br><span class="line">subResourceData.pData = initData;</span><br><span class="line">subResourceData.RowPitch = byteSize;</span><br><span class="line">subResourceData.SlicePitch = subResourceData.RowPitch;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 转换状态上传数据</span></span><br><span class="line">cmdList-&gt;<span class="built_in">ResourceBarrier</span>(<span class="number">1</span>, &amp;CD3DX12_RESOURCE_BARRIER::<span class="built_in">Transition</span>(defaultBuffer.<span class="built_in">Get</span>(), </span><br><span class="line">    D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));</span><br><span class="line">UpdateSubresources&lt;<span class="number">1</span>&gt;(cmdList, defaultBuffer.<span class="built_in">Get</span>(), uploadBuffer.<span class="built_in">Get</span>(), <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, &amp;subResourceData);</span><br><span class="line">cmdList-&gt;<span class="built_in">ResourceBarrier</span>(<span class="number">1</span>, &amp;CD3DX12_RESOURCE_BARRIER::<span class="built_in">Transition</span>(defaultBuffer.<span class="built_in">Get</span>(),</span><br><span class="line">    D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));</span><br></pre></td></tr></table></figure>
+
+<p>这样就完成了将数据上传到Default Heap的工作</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>使用<code>ID3DResource</code>创建VertexBufferView(<code>D3D12_VERTEX_BUFFER_VIEW</code>)/IndexBufferView(<code>D3D12_INDEX_BUFFER_VIEW</code>), 将其使用Command List的方法<code>IASetVertexBuffers</code>/<code>IASetIndexBuffer</code>绑定即可在之后的<code>DrawIndexedInstanced</code>中使用对应的VertexBuffer/IndexBuffer</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建VertexBufferView, IndexBufferView</span></span><br><span class="line">D3D12_VERTEX_BUFFER_VIEW vbv;</span><br><span class="line">vbv.BufferLocation = vertexBuffer-&gt;<span class="built_in">GetGPUVirtualAddress</span>(); <span class="comment">// 先前创建的defaultBuffer</span></span><br><span class="line">vbv.StrideInBytes = VertexByteStride; <span class="comment">// Vertex结构体的大小</span></span><br><span class="line">vbv.SizeInBytes = VertexBufferByteSize; <span class="comment">// VertexBuffer总大小</span></span><br><span class="line"></span><br><span class="line">D3D12_INDEX_BUFFER_VIEW ibv;</span><br><span class="line">ibv.BufferLocation = indexBuffer-&gt;<span class="built_in">GetGPUVirtualAddress</span>();</span><br><span class="line">ibv.Format = DXGI_FORMAT_R16_UINT; <span class="comment">// Index Buffer数据格式</span></span><br><span class="line">ibv.SizeInBytes = IndexBufferByteSize; <span class="comment">// Index Buffer总大小</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置VBV, IBV</span></span><br><span class="line">cmdList-&gt;<span class="built_in">IASetVertexBuffers</span>(<span class="number">0</span>, <span class="number">1</span>, &amp;vbv);</span><br><span class="line">cmdList-&gt;<span class="built_in">IASetIndexBuffer</span>(&amp;ibv);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// cmdList-&gt;DrawIndexedInstanced(...)</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Constant-Buffer"><a href="#Constant-Buffer" class="headerlink" title="Constant Buffer"></a>Constant Buffer</h2><h3 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h3><h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><h2 id="Texture"><a href="#Texture" class="headerlink" title="Texture"></a>Texture</h2><h3 id="创建-2"><a href="#创建-2" class="headerlink" title="创建"></a>创建</h3><h3 id="使用-2"><a href="#使用-2" class="headerlink" title="使用"></a>使用</h3><h2 id="Shader"><a href="#Shader" class="headerlink" title="Shader"></a>Shader</h2><h3 id="创建-3"><a href="#创建-3" class="headerlink" title="创建"></a>创建</h3><h3 id="使用-3"><a href="#使用-3" class="headerlink" title="使用"></a>使用</h3>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title='0' data-url='https://link.hhtjim.com/163/1401042579.mp3'></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+    <div id='gitalk-container' class="comment link"
+		data-enable='false'
+        data-ae='false'
+        data-ci=''
+        data-cs=''
+        data-r=''
+        data-o=''
+        data-a=''
+        data-d='false'
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
+</body>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
