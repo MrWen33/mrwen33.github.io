@@ -15,6 +15,7 @@
   },
   "scripts": {
     "docs:build": "vuepress build posts",
+    "docs:update-post": "cd scripts && update-posts.bat",
     "docs:clean-dev": "vuepress dev posts --clean-cache",
     "docs:dev": "vuepress dev posts",
     "docs:eject-theme": "vuepress eject-hope docs"
