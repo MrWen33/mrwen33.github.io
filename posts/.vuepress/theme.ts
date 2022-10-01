@@ -37,7 +37,7 @@ export default hopeTheme({
       navbar: zhNavbar,
 
       // sidebar
-      sidebar: zhSidebar,
+      sidebar: zhSidebar, 
 
       footer: "MrWen33",
 
